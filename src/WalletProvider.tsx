@@ -1,81 +1,72 @@
-import { PropsWithChildren, createContext } from "react";
-
-import { useEffect, useState } from "react";
 import {
-  ProviderConnectReturnType,
-  connectToWallet,
-  getProvider,
-} from "./phantom-provider";
-
+  WalletAdapterNetwork,
+  WalletReadyState,
+} from "@solana/wallet-adapter-base";
 import {
-  Web3ReactHooks,
-  Web3ReactProvider,
-  initializeConnector,
-} from "@web3-react/core";
-import { Connector, Web3ReactStore } from "@web3-react/types";
-import { Phantom } from "web3-react-phantom";
+  ConnectionProvider,
+  WalletProvider as SolanaWalletProvider,
+  useWallet,
+} from "@solana/wallet-adapter-react";
+import {
+  WalletModalProvider,
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
+import "@solana/wallet-adapter-react-ui/styles.css";
+import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
+import { clusterApiUrl } from "@solana/web3.js";
 
-const phantom = initializeConnector<Phantom>(
-  (actions) => new Phantom({ actions }),
-);
+import { FC, PropsWithChildren, useMemo } from "react";
 
-const connectors: [Connector, Web3ReactHooks, Web3ReactStore][] = [phantom];
-const connections: [Connector, Web3ReactHooks][] = connectors.map(
-  ([connector, hooks]) => [connector, hooks],
-);
-
-export const WalletProvider = createContext(
-  null as Awaited<ProviderConnectReturnType> | null,
-);
-
-export const WalletConnect = ({ children }: PropsWithChildren) => {
-  const [isWalletNotAvailable, setWalletIsNotAvailable] = useState(null);
-  const [provider, setProvider] = useState(null);
-
-  useEffect(() => {
-    try {
-      connectToWallet()
-        .then(() => {
-          // @ts-expect-error adapter types
-          setProvider(getProvider());
-          // solanaClient
-          //   .create(createStreamParams, solanaParams())
-          //   .then(({ ixs, txId, metadataId }) => {
-          //     console.log(ixs, txId, metadataId);
-          //   })
-          //   .catch((error) => {
-          //     setWalletIsNotAvailable(error);
-          //   }); // second argument differ depending on a chain
-        })
-        .catch((error) => {
-          setWalletIsNotAvailable(error);
-        });
-    } catch (exception) {
-      // handle exception
-      console.error(exception);
-    }
-  }, []);
+export const WalletProvider: FC<PropsWithChildren> = ({ children }) => {
+  const network = WalletAdapterNetwork.Devnet;
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const wallets = useMemo(() => [new PhantomWalletAdapter()], [network]);
 
   return (
-    <Web3ReactProvider connectors={connections}>
-      <WalletProvider.Provider value={provider}>
-        {isWalletNotAvailable ? (
-          <div className="p-4 rounded-2xl bg-red-300 text-red-400">
-            <span className="text-red-900">
-              Phantom wallet is not available
-            </span>{" "}
-            <a
-              className="block mt-4 text-slate-800"
-              href="https://phantom.app/"
-              target="_blank"
-            >
-              Go to https://phantom.app/ to install it
-            </a>{" "}
-          </div>
-        ) : (
-          children
-        )}
-      </WalletProvider.Provider>
-    </Web3ReactProvider>
+    <ConnectionProvider endpoint={endpoint}>
+      <SolanaWalletProvider wallets={wallets} autoConnect>
+        <WalletModalProvider>
+          <WalletMultiButton />
+          {/* <WalletDisconnectButton /> */}
+          <WalletConnect>{children}</WalletConnect>
+        </WalletModalProvider>
+      </SolanaWalletProvider>
+    </ConnectionProvider>
+  );
+};
+
+// export const WalletProvider = createContext(
+//   null as Awaited<ProviderConnectReturnType> | null,
+// );
+
+const DisabledWalletStates = [
+  WalletReadyState.NotDetected,
+  WalletReadyState.Unsupported,
+];
+
+const WalletConnect = ({ children }: PropsWithChildren) => {
+  const { wallets } = useWallet();
+
+  const isEveryWalletsDisabled = wallets.every((wallet) =>
+    DisabledWalletStates.includes(wallet.readyState),
+  );
+  return (
+    <>
+      {isEveryWalletsDisabled ? (
+        <div className="p-4 rounded-2xl bg-red-300 text-red-400">
+          <span className="text-red-900">Phantom wallet is not available</span>{" "}
+          <a
+            className="block mt-4 text-slate-800"
+            href="https://phantom.app/"
+            target="_blank"
+          >
+            Go to https://phantom.app/ to install it
+          </a>{" "}
+        </div>
+      ) : (
+        children
+      )}
+    </>
   );
 };

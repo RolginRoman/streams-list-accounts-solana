@@ -1,4 +1,4 @@
-export const getProvider = () => {
+const getProvider = () => {
   if ("phantom" in window) {
     const provider = window.phantom?.solana;
     // TODO where to get actual phantom integration typings
@@ -14,7 +14,7 @@ export type ProviderConnectReturnType = ReturnType<
   ReturnType<typeof getProvider>["connect"]
 >;
 
-export const connectToWallet: () => ProviderConnectReturnType = () => {
+const connectToWallet: () => ProviderConnectReturnType = () => {
   return new Promise((resolve, reject) => {
     try {
       const provider = getProvider();

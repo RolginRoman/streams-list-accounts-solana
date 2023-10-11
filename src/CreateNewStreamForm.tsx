@@ -1,17 +1,13 @@
-import { getProvider } from "./phantom-provider";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 import { StreamflowSolana, Types, getBN } from "@streamflow/stream";
 import BN from "bn.js";
 import { useForm } from "react-hook-form";
+
 const solanaClient = new StreamflowSolana.SolanaStreamClient(
   // "entrypoint.devnet.solana.com:8001",
   "https://api.devnet.solana.com",
 );
-
-(function () {
-  const big = getBN(100, 9);
-  console.log(big.toString());
-})();
 
 const createStreamParams: Types.ICreateStreamData = {
   recipient: "FrzJcAWGyMnfYb6imyjb85Qs4LB8gmswNnb7tsf1JTDw", // Recipient address.
@@ -36,10 +32,9 @@ const createStreamParams: Types.ICreateStreamData = {
 const solanaParams: () => StreamflowSolana.ICreateStreamSolanaExt = () => {
   return {
     sender:
-      getProvider() as unknown as StreamflowSolana.ICreateStreamSolanaExt["sender"], // SignerWalletAdapter or Keypair of Sender account
+      null as unknown as StreamflowSolana.ICreateStreamSolanaExt["sender"], // SignerWalletAdapter or Keypair of Sender account
   };
 };
-
 
 // const provider = getProvider(); // see "Detecting the Provider"
 // try {
@@ -55,6 +50,8 @@ type FormValues = Pick<
 >;
 
 export const CreateNewStreamForm = () => {
+  const { publicKey } = useWallet();
+
   const form = useForm<FormValues>({
     defaultValues: {
       name: "",
@@ -65,12 +62,13 @@ export const CreateNewStreamForm = () => {
 
   const onCreateNewStream = (data: FormValues) => {
     console.log(data);
+    console.log(publicKey?.toString());
   };
 
   return (
     <form
       onSubmit={form.handleSubmit(onCreateNewStream)}
-      className="space-y-4 mt-6"
+      className="space-y-4 mt-6 w-full"
     >
       <label className="block text-sm font-medium leading-6 text-gray-900">
         Stream name
