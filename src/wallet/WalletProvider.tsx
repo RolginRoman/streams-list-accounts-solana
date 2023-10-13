@@ -15,9 +15,9 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
 import { clusterApiUrl } from "@solana/web3.js";
 
-import { FC, PropsWithChildren, useMemo } from "react";
+import { PropsWithChildren, useMemo } from "react";
 
-export const WalletProvider: FC<PropsWithChildren> = ({ children }) => {
+export const WalletProvider = ({ children }: PropsWithChildren) => {
   const network = WalletAdapterNetwork.Devnet;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -27,18 +27,15 @@ export const WalletProvider: FC<PropsWithChildren> = ({ children }) => {
     <ConnectionProvider endpoint={endpoint}>
       <SolanaWalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <WalletMultiButton />
-          {/* <WalletDisconnectButton /> */}
-          <WalletConnect>{children}</WalletConnect>
+          <div className="m-2">
+            <WalletMultiButton style={{ height: "2rem" }} />
+            <WalletConnect>{children}</WalletConnect>
+          </div>
         </WalletModalProvider>
       </SolanaWalletProvider>
     </ConnectionProvider>
   );
 };
-
-// export const WalletProvider = createContext(
-//   null as Awaited<ProviderConnectReturnType> | null,
-// );
 
 const DisabledWalletStates = [
   WalletReadyState.NotDetected,
@@ -46,27 +43,30 @@ const DisabledWalletStates = [
 ];
 
 const WalletConnect = ({ children }: PropsWithChildren) => {
-  const { wallets } = useWallet();
+  const { wallets, publicKey } = useWallet();
 
   const isEveryWalletsDisabled = wallets.every((wallet) =>
     DisabledWalletStates.includes(wallet.readyState),
   );
-  return (
-    <>
-      {isEveryWalletsDisabled ? (
-        <div className="p-4 rounded-2xl bg-red-300 text-red-400">
-          <span className="text-red-900">Phantom wallet is not available</span>{" "}
-          <a
-            className="block mt-4 text-slate-800"
-            href="https://phantom.app/"
-            target="_blank"
-          >
-            Go to https://phantom.app/ to install it
-          </a>{" "}
-        </div>
-      ) : (
-        children
-      )}
-    </>
-  );
+
+  if (isEveryWalletsDisabled) {
+    return (
+      <div className="p-4 rounded-2xl bg-red-300 text-red-400">
+        <span className="text-red-900">Phantom wallet is not available</span>{" "}
+        <a
+          className="block mt-4 text-slate-800"
+          href="https://phantom.app/"
+          target="_blank"
+        >
+          Go to https://phantom.app/ to install it
+        </a>{" "}
+      </div>
+    );
+  }
+
+  if (!publicKey) {
+    return <div>Please connect your wallet</div>;
+  }
+
+  return <>{children}</>;
 };

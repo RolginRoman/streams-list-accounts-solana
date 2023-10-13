@@ -1,11 +1,9 @@
-import { Streams } from "./Streams";
+import { Streams } from "./streams/Streams";
 
-function App() {
+export default function App() {
   return (
     <div className="m-2">
       <Streams />
     </div>
   );
 }
-
-export default App;
