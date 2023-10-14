@@ -1,19 +1,17 @@
 import { clusterApiUrl } from "@solana/web3.js";
 import { StreamflowSolana } from "@streamflow/stream";
-import { FC, PropsWithChildren, useMemo } from "react";
-import { StreamflowClient } from "../hooks/useClient";
 import { ICluster } from "@streamflow/stream/dist/common/types";
+import { FC, PropsWithChildren } from "react";
+import { StreamflowClient } from "../../hooks/useClient";
+
+const client = new StreamflowSolana.SolanaStreamClient(
+  clusterApiUrl("devnet"),
+  ICluster.Devnet,
+);
 
 export const StreamflowClientWrapper: FC<PropsWithChildren> = ({
   children,
 }) => {
-  const client = useMemo(() => {
-    return new StreamflowSolana.SolanaStreamClient(
-      clusterApiUrl("devnet"),
-      ICluster.Devnet,
-    );
-  }, []);
-
   return (
     <StreamflowClient.Provider value={client}>
       {children}

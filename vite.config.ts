@@ -10,8 +10,8 @@ export default defineConfig({
     https: true,
   },
   build: {
-		rollupOptions: {
-			plugins: [inject({ Buffer: ['Buffer', 'Buffer'] })],
-		},
-	},
+    rollupOptions: {
+      plugins: [inject({ Buffer: ["Buffer", "Buffer"] })],
+    },
+  },
 });

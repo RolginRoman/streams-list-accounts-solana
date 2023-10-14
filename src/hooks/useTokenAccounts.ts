@@ -1,22 +1,34 @@
 import * as SPLToken from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey } from "@solana/web3.js";
-import { useEffect, useState } from "react";
-import { TokenItem, useTokensMap } from "./useTokensMap";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useTokens } from "./useTokens";
+import BN from "bn.js";
+import { TokenItem } from "../types/token";
 
 interface TokenAccountsWithBalance {
   publicKey: PublicKey;
-  amount: bigint;
+  amount: BN;
   name: string;
   decimals: number;
 }
+
+export const TokensAccountsContext = createContext({
+  tokenAccountsWithBalance: [],
+  isLoading: false,
+  error: undefined,
+} as ReturnType<typeof useTokenAccountsWithBalance>);
+
+export const useTokenAccounts = () => {
+  return useContext(TokensAccountsContext);
+};
 
 export const useTokenAccountsWithBalance = () => {
   const { connection } = useConnection();
   const { publicKey } = useWallet();
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState(null as unknown);
-  const tokens = useTokensMap();
+  const tokens = useTokens();
   const [tokenAccountsWithBalance, setTokenAccountsWithBalance] = useState(
     [] as TokenAccountsWithBalance[],
   );
@@ -26,32 +38,16 @@ export const useTokenAccountsWithBalance = () => {
     setLoading(true);
     if (publicKey && connection && NATIVE_TOKEN) {
       const ownerPk = new PublicKey(publicKey);
+      const balances = Promise.all([
+        getOwnerBalance(connection, ownerPk, NATIVE_TOKEN),
+        getSplTokensBalance(connection, ownerPk, tokens),
+      ]).then(([nativeBalance, splTokensBalance]) => [
+        nativeBalance,
+        ...splTokensBalance,
+      ]);
 
-      const getOwnerBalance = () =>
-        connection.getBalance(ownerPk).then((ownBalance) => ({
-          publicKey: ownerPk,
-          amount: BigInt(ownBalance),
-          name: NATIVE_TOKEN.symbol,
-          decimals: NATIVE_TOKEN.decimals,
-        }));
-
-      const getAccountsBalances = () =>
-        connection
-          .getTokenAccountsByOwner(ownerPk, {
-            programId: SPLToken.TOKEN_PROGRAM_ID,
-          })
-          .then(async (accounts) => {
-            return await resolveTokenAccountsInfo(
-              connection,
-              accounts.value.map((account) => account.pubkey),
-              tokens,
-            );
-          });
-
-      Promise.all([getAccountsBalances(), getOwnerBalance()])
-        .then(async ([balances, ownBalance]) => {
-          setTokenAccountsWithBalance([ownBalance, ...balances]);
-        })
+      balances
+        .then((allAccounts) => setTokenAccountsWithBalance(allAccounts))
         .catch((error) => {
           console.error(error);
           setError(error);
@@ -64,6 +60,37 @@ export const useTokenAccountsWithBalance = () => {
 
   return { tokenAccountsWithBalance, isLoading, error };
 };
+
+async function getOwnerBalance(
+  connection: Connection,
+  ownerPk: PublicKey,
+  solToken: TokenItem,
+) {
+  return connection.getBalance(ownerPk).then((ownBalance) => ({
+    publicKey: SPLToken.NATIVE_MINT,
+    amount: new BN(ownBalance),
+    name: solToken.symbol,
+    decimals: solToken.decimals,
+  }));
+}
+
+async function getSplTokensBalance(
+  connection: Connection,
+  ownerPk: PublicKey,
+  tokens: Map<string, TokenItem>,
+) {
+  return connection
+    .getTokenAccountsByOwner(ownerPk, {
+      programId: SPLToken.TOKEN_PROGRAM_ID,
+    })
+    .then(async (accounts) =>
+      resolveTokenAccountsInfo(
+        connection,
+        accounts.value.map((account) => account.pubkey),
+        tokens,
+      ),
+    );
+}
 
 async function resolveTokenAccountsInfo(
   connection: Connection,
@@ -80,11 +107,12 @@ async function resolveTokenAccountsInfo(
     if (!tokenInfo) {
       return accounts;
     }
+    const amount = new BN(accountInfo.amount.toString());
     return [
       ...accounts,
       {
         publicKey: accountInfo.mint,
-        amount: accountInfo.amount,
+        amount: amount,
         decimals: tokenInfo.decimals,
         name: tokenInfo.symbol ?? accountInfo.mint.toString(),
       } as TokenAccountsWithBalance,
