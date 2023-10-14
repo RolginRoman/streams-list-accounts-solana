@@ -1,5 +1,5 @@
 import { Types } from "@streamflow/stream";
-import { StreamsTable } from "./StreamsTable";
+import { StreamsTable } from "../streams-table/StreamsTable";
 
 interface Props {
   streams: [string, Types.Stream][] | null;

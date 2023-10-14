@@ -26,7 +26,7 @@ export const useTokenAccounts = () => {
 export const useTokenAccountsWithBalance = () => {
   const { connection } = useConnection();
   const { publicKey } = useWallet();
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState(null as unknown);
   const tokens = useTokens();
   const [tokenAccountsWithBalance, setTokenAccountsWithBalance] = useState(
