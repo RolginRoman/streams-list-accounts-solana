@@ -16,3 +16,4 @@ How to start work here:
 # Known minors
 
 - Rate-limits rpc?
+- bundle size (all web3 js stuff is really massive. need futher investigation)

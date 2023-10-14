@@ -4,7 +4,7 @@ import {
   useTokenAccountsWithBalance,
 } from "../../hooks/useTokenAccounts";
 
-export const TokensAccountsContextProvider = ({
+export const TokensAccountsProvider = ({
   children,
 }: PropsWithChildren) => {
   const tokenBalances = useTokenAccountsWithBalance();

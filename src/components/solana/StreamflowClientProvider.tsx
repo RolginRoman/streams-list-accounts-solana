@@ -9,7 +9,7 @@ const client = new StreamflowSolana.SolanaStreamClient(
   ICluster.Devnet,
 );
 
-export const StreamflowClientWrapper: FC<PropsWithChildren> = ({
+export const StreamflowClientProvider: FC<PropsWithChildren> = ({
   children,
 }) => {
   return (

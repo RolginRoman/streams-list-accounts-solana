@@ -1,19 +1,19 @@
-import { TokensAccountsContextProvider } from "./components/accounts/TokenAccountsContext";
-import { StreamflowClientWrapper } from "./components/solana/StreamflowClientWrapper";
-import { TokensMapProvider } from "./components/tokens/TokensMapContext";
+import { TokensAccountsProvider } from "./components/accounts/TokenAccountsProvider";
+import { StreamflowClientProvider } from "./components/solana/StreamflowClientProvider";
+import { TokensMapProvider } from "./components/tokens/TokensMapProvider";
 import { Streams } from "./components/streams/Streams";
 import { WalletProvider } from "./components/wallet/WalletProvider";
 
 export default function App() {
   return (
     <WalletProvider>
-      <StreamflowClientWrapper>
+      <StreamflowClientProvider>
         <TokensMapProvider>
-          <TokensAccountsContextProvider>
+          <TokensAccountsProvider>
             <Streams />
-          </TokensAccountsContextProvider>
+          </TokensAccountsProvider>
         </TokensMapProvider>
-      </StreamflowClientWrapper>
+      </StreamflowClientProvider>
     </WalletProvider>
   );
 }
