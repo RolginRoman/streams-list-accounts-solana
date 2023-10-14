@@ -22,6 +22,7 @@
     "react-hook-form": "^7.47.0"
   },
   "devDependencies": {
+    "@rollup/plugin-inject": "^5.0.4",
     "@types/bn.js": "^5.1.2",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",

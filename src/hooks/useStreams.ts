@@ -18,13 +18,14 @@ const getCreateStreamRequestParams = (
 ): Types.ICreateStreamData => {
   const predefinedCreateStreamParams: Omit<
     Types.ICreateStreamData,
-    keyof CreateStreamRequest | "start" | "cliff" | "period" | "amountPerPeriod"
+    keyof CreateStreamRequest | "start" | "period" | "amountPerPeriod"
   > = {
-    cliffAmount: getBN(0, 1), // Amount unlocked at the "cliff" timestamp.
-    cancelableBySender: true, // Whether or not sender can cancel the stream.
-    cancelableByRecipient: false, // Whether or not recipient can cancel the stream.
-    transferableBySender: true, // Whether or not sender can transfer the stream.
-    transferableByRecipient: false, // Whether or not recipient can transfer the stream.
+    cliffAmount: getBN(0, 0),
+    cliff: 0,
+    cancelableBySender: true,
+    cancelableByRecipient: false,
+    transferableBySender: true,
+    transferableByRecipient: false,
   };
 
   const { amount, decimals, ...createStreamPayload } = data;
@@ -38,9 +39,6 @@ const getCreateStreamRequestParams = (
     amountPerPeriod,
     period: minutesInSeconds(5), // Time step (period) in seconds per which the unlocking occurs.
     start: minutesFromNow(2),
-    cliff: 0,
-    cliffAmount: getBN(0, 0),
-    // cliff: minutesFromNow(3),
   };
 };
 

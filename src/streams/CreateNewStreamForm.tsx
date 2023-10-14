@@ -19,7 +19,7 @@ export const CreateNewStreamForm = () => {
       recipient: "",
       canTopup: false,
       tokenId: undefined,
-      amount: 0,
+      amount: undefined,
     },
   });
 
