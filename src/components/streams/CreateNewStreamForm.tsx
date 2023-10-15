@@ -44,7 +44,7 @@ export const CreateNewStreamForm = ({ onCreate }: Props) => {
         throw new Error("[create stream]: unrecognized token selected");
       }
 
-      // TODO appropriate conversion from input value to BN?
+      // What is a better way to convert from input value to BN?
       const amount = getBN(parseFloat(data.amount), tokenInfo.decimals);
       createStream({
         ...data,
