@@ -1,5 +1,6 @@
 import { Types } from "@streamflow/stream";
 import { StreamsTable } from "../streams-table/StreamsTable";
+import { ReactNode } from "react";
 
 interface Props {
   streams: [string, Types.Stream][] | null;
@@ -8,6 +9,10 @@ interface Props {
 }
 
 export const StreamsList = ({ streams, reload, isLoading }: Props) => {
+  const emptyStateContent: ReactNode = isLoading
+    ? "Loading..."
+    : "No streams available";
+
   return (
     <div className="mt-6">
       <h2 className="my-2 font-semibold">
@@ -24,7 +29,7 @@ export const StreamsList = ({ streams, reload, isLoading }: Props) => {
         {streams?.length ? (
           <StreamsTable streams={streams} />
         ) : (
-          "No streams available"
+          emptyStateContent
         )}
       </div>
     </div>
