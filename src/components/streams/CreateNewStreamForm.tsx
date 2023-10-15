@@ -1,7 +1,7 @@
 import { getBN } from "@streamflow/stream";
 import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { useCreateStream } from "../../hooks/useStreams";
+import { useCreateStream } from "../../hooks/useCreateStream";
 import { useTokenAccounts } from "../../hooks/useTokenAccounts";
 import { CreateStreamRequest } from "../../types/stream";
 import { formatBN } from "../../utils/format-bn";

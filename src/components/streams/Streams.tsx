@@ -1,11 +1,11 @@
-import { useAllStreams } from "../../hooks/useStreams";
+import { useStreams } from "../../hooks/useStreams";
 import { useTokenAccounts } from "../../hooks/useTokenAccounts";
 import { CreateNewStreamForm } from "./CreateNewStreamForm";
 import { StreamsList } from "./StreamsList";
 
 export const Streams = () => {
   const { error, isLoading } = useTokenAccounts();
-  const { streams, reload, isLoading: areStreamsLoading } = useAllStreams();
+  const { streams, reload, isLoading: areStreamsLoading } = useStreams();
 
   if (isLoading) {
     return <p className="my-2">Loading...</p>;
